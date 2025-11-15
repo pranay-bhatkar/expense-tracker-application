@@ -2,6 +2,7 @@ package com.expense_tracker.service;
 
 import com.expense_tracker.exception.UserAlreadyExistException;
 import com.expense_tracker.exception.UserNotFoundException;
+import com.expense_tracker.model.Role;
 import com.expense_tracker.model.User;
 import com.expense_tracker.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -34,6 +35,10 @@ public class UserService {
 
         // encode password before saving
         user.setPassword(passwordEncoder.encode(user.getPassword()));
+
+        if (user.getRole() == null) {
+            user.setRole(Role.USER);
+        }
 
         return userRepository.save(user);
     }
@@ -72,8 +77,8 @@ public class UserService {
 
         existingUser.setName(updateUser.getName());
         existingUser.setEmail(updateUser.getEmail());
-        existingUser.setRole(updateUser.getRole());
-//        existingUser.setPassword(updateUser.getPassword());
+
+//      existingUser.setPassword(updateUser.getPassword());
 
         // if password provided in updateUser, encode it; otherwise keep existing
         if (updateUser.getPassword() != null && !updateUser.getPassword().isBlank()) {
@@ -88,6 +93,11 @@ public class UserService {
         User existingUser = userRepository.findById(id)
                 .orElseThrow(() -> new UserNotFoundException("User not found with ID : " + id));
 
+        if (updates.containsKey("role")) {
+            throw new IllegalArgumentException("Role cannot be modified through this endpoint");
+        }
+
+
         // apply only the provided updates
         updates.forEach((field, value) -> {
             switch (field) {
@@ -99,8 +109,6 @@ public class UserService {
                     }
                     existingUser.setEmail((String) value);
                 }
-
-                case "role" -> existingUser.setRole((String) value);
 
                 case "password" -> existingUser.setPassword(passwordEncoder.encode((String) value));
 
@@ -117,5 +125,13 @@ public class UserService {
             throw new UserNotFoundException("No users found to delete");
         }
         userRepository.deleteAll();
+    }
+
+    public User changeUserRole(Long id, Role newRole) {
+        User user = userRepository.findById(id)
+                .orElseThrow(() -> new UserNotFoundException("User not found with ID : " + id));
+
+        user.setRole(newRole);
+        return userRepository.save(user);
     }
 }

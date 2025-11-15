@@ -5,6 +5,7 @@ package com.expense_tracker.controller;
 
 import com.expense_tracker.dto.UserRequestDTO;
 import com.expense_tracker.dto.UserResponseDTO;
+import com.expense_tracker.model.Role;
 import com.expense_tracker.model.User;
 import com.expense_tracker.response.ApiResponse;
 import com.expense_tracker.service.UserService;
@@ -14,6 +15,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.HashMap;
@@ -128,4 +130,23 @@ public class UserController {
         );
         return ResponseEntity.ok(response);
     }
+
+    @PreAuthorize("hasRole('ADMIN')")
+    @PatchMapping("/{id}/role")
+    public ResponseEntity<ApiResponse<UserResponseDTO>> updateUserRole(
+            @PathVariable Long id,
+            @RequestParam Role role) {
+
+        User updatedUser = userService.changeUserRole(id, role);
+        UserResponseDTO dto = UserMapper.toDTO(updatedUser);
+
+        return ResponseEntity.ok(new ApiResponse<>(
+                "success",
+                "Role updated successfully",
+                dto,
+                HttpStatus.OK.value()
+        ));
+    }
+
+
 }
