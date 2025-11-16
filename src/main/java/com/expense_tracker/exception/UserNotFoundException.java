@@ -1,7 +1,9 @@
 package com.expense_tracker.exception;
 
-public class UserNotFoundException extends RuntimeException {
-    public UserNotFoundException (String message){
-        super(message);
+import org.springframework.http.HttpStatus;
+
+public class UserNotFoundException extends ApiException {
+    public UserNotFoundException(String message) {
+        super(message, HttpStatus.NOT_FOUND);
     }
 }

@@ -11,7 +11,7 @@ public class UserRequestDTO {
     private String name;
 
     @NotBlank(message = "Email is required")
-    @Email
+    @Email(message = "Invalid email format")
     private String email;
 
     @NotBlank(message = "Password is required")

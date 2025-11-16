@@ -13,6 +13,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 
@@ -56,7 +57,8 @@ public class UserService {
     }
 
     public User getUserById(Long id) {
-        return userRepository.findById(id).orElseThrow(() -> new UserNotFoundException("User not found with ID : " + id));
+        return userRepository.findById(id).orElseThrow(()
+                -> new UserNotFoundException("User not found with ID : " + id));
     }
 
     public void deleteUser(Long id) {
@@ -68,10 +70,12 @@ public class UserService {
 
     // update all user details { put }
     public User updateUser(Long id, User updateUser) {
-        User existingUser = userRepository.findById(id).orElseThrow(() -> new UserNotFoundException("User not found with ID : " + id));
+        User existingUser = userRepository.findById(id).orElseThrow(()
+                -> new UserNotFoundException("User not found with ID : " + id));
 
         // check for duplicates email (except current user)
-        if (userRepository.findByEmail(updateUser.getEmail()).filter(user -> !user.getId().equals(id)).isPresent()) {
+        if (userRepository.findByEmail(updateUser.getEmail()).filter(
+                user -> !user.getId().equals(id)).isPresent()) {
             throw new UserAlreadyExistException("Email already in use : " + updateUser.getEmail());
         }
 

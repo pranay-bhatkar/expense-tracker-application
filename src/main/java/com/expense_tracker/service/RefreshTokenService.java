@@ -6,6 +6,7 @@ import com.expense_tracker.model.User;
 import com.expense_tracker.repository.RefreshTokenRepository;
 import com.expense_tracker.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import org.apache.el.stream.Stream;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -61,6 +62,11 @@ public class RefreshTokenService {
     @Transactional
     public void revokeAllTokensForUser(User user) {
         refreshTokenRepository.deleteByUser(user);
+    }
+
+
+    public Optional<RefreshToken> findTopByUser(User user) {
+        return refreshTokenRepository.findTopByUserOrderByIdDesc(user);
     }
 
 }

@@ -1,6 +1,3 @@
-
-
-
 package com.expense_tracker.controller;
 
 import com.expense_tracker.dto.UserRequestDTO;
@@ -32,12 +29,18 @@ public class UserController {
 
     // CREATE
     @PostMapping
-    public ResponseEntity<ApiResponse<UserResponseDTO>> createUser(@Valid @RequestBody UserRequestDTO userRequest) {
+    public ResponseEntity<ApiResponse<UserResponseDTO>> createUser(
+            @Valid @RequestBody UserRequestDTO userRequest) {
         User userEntity = UserMapper.toEntity(userRequest);
         User saved = userService.saveUser(userEntity); // password is encoded in service
         UserResponseDTO dto = UserMapper.toDTO(saved);
 
-        ApiResponse<UserResponseDTO> response = new ApiResponse<>("success", "User created successfully", dto, HttpStatus.CREATED.value());
+        ApiResponse<UserResponseDTO> response = new ApiResponse<>(
+                "success",
+                "User created successfully",
+                dto,
+                HttpStatus.CREATED.value()
+        );
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
@@ -64,7 +67,12 @@ public class UserController {
         responseData.put("sortBy", sortBy);
         responseData.put("sortDir", sortDir);
 
-        ApiResponse<Map<String, Object>> response = new ApiResponse<>("success", "Fetched paginated users successfully", responseData, HttpStatus.OK.value());
+        ApiResponse<Map<String, Object>> response = new ApiResponse<>(
+                "success",
+                "Fetched paginated users successfully",
+                responseData,
+                HttpStatus.OK.value()
+        );
         return ResponseEntity.ok(response);
     }
 
@@ -73,13 +81,20 @@ public class UserController {
     public ResponseEntity<ApiResponse<UserResponseDTO>> getUserById(@PathVariable Long id) {
         User user = userService.getUserById(id);
         UserResponseDTO dto = UserMapper.toDTO(user);
-        ApiResponse<UserResponseDTO> response = new ApiResponse<>("success", "User fetched successfully", dto, HttpStatus.OK.value());
+        ApiResponse<UserResponseDTO> response = new ApiResponse<>(
+                "success",
+                "User fetched successfully",
+                dto,
+                HttpStatus.OK.value()
+        );
         return ResponseEntity.ok(response);
     }
 
     // PUT (replace all) - accept UserRequestDTO (password optional behavior handled in service)
     @PutMapping("/{id}")
-    public ResponseEntity<ApiResponse<UserResponseDTO>> updateUser(@PathVariable Long id, @Valid @RequestBody UserRequestDTO userRequest) {
+    public ResponseEntity<ApiResponse<UserResponseDTO>> updateUser(
+            @PathVariable Long id,
+            @Valid @RequestBody UserRequestDTO userRequest) {
         User updateEntity = UserMapper.toEntity(userRequest);
         User updated = userService.updateUser(id, updateEntity);
         UserResponseDTO dto = UserMapper.toDTO(updated);

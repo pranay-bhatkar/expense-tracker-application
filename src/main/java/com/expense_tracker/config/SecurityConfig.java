@@ -1,7 +1,7 @@
 package com.expense_tracker.config;
 
 import com.expense_tracker.security.JwtAuthenticationFilter;
-import com.expense_tracker.service.UserAuthService;
+import com.expense_tracker.service.AuthService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -22,7 +22,7 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 public class SecurityConfig {
 
     private final JwtAuthenticationFilter jwtAuthFilter;
-    private final UserAuthService userAuthService;
+    private final AuthService authService;
     private final PasswordEncoder passwordEncoder;
 
     @Bean
@@ -45,7 +45,7 @@ public class SecurityConfig {
     @Bean
     public DaoAuthenticationProvider authenticationProvider() {
         DaoAuthenticationProvider provider = new DaoAuthenticationProvider();
-        provider.setUserDetailsService(userAuthService);
+        provider.setUserDetailsService(authService);
         provider.setPasswordEncoder(passwordEncoder);
         return provider;
     }
