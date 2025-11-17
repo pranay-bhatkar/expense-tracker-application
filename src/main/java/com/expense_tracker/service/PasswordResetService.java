@@ -28,7 +28,12 @@ public class PasswordResetService {
 
         otpRepository.save(resetOtp);
 
-        emailService.sendOtpEmail(user.getEmail(), otp);
+        // Send OTP with Thymeleaf template
+        emailService.sendOtpEmail(
+                user.getEmail(),
+                user.getName(),
+                otp
+        );
     }
 
 

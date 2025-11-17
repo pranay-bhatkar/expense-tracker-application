@@ -28,7 +28,7 @@ public class Category {
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    private CategoryType type;
+    private TransactionType type;
 
     private String icon;
 
@@ -44,7 +44,7 @@ public class Category {
     @UpdateTimestamp
     private LocalDateTime updatedAt;
 
-    public Category(String name, CategoryType type, String icon, Long userId) {
+    public Category(String name, TransactionType type, String icon, Long userId) {
         this.name = name;
         this.type = type;
         this.icon = icon;

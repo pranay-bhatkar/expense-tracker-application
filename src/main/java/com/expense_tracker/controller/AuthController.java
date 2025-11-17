@@ -1,9 +1,6 @@
 package com.expense_tracker.controller;
 
-import com.expense_tracker.dto.AuthResponse;
-import com.expense_tracker.dto.LoginRequest;
-import com.expense_tracker.dto.UserRequestDTO;
-import com.expense_tracker.dto.UserResponseDTO;
+import com.expense_tracker.dto.*;
 import com.expense_tracker.exception.UserNotFoundException;
 import com.expense_tracker.model.Role;
 import com.expense_tracker.model.User;
@@ -17,7 +14,10 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 import java.util.Map;
 
@@ -133,30 +133,29 @@ public class AuthController {
 
     @PostMapping("/forgot-password")
     public ResponseEntity<ApiResponse<String>> forgotPassword(
-            @RequestParam String email
+            @RequestBody EmailRequest request
     ) {
+        String email = request.getEmail();
+
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new UserNotFoundException("User not found " + email));
 
         passwordResetService.generateOtp(user);
-        return ResponseEntity.ok(new ApiResponse<>(
-                "success",
-                "OTP sent to email",
-                null,
-                200
-        ));
+
+        return ResponseEntity.ok(
+                new ApiResponse<>("success", "OTP sent to email", null, 200)
+        );
     }
+
 
     @PostMapping("/reset-password")
     public ResponseEntity<ApiResponse<String>> resetPassword(
-            @RequestParam String email,
-            @RequestParam String otp,
-            @RequestParam String newPassword
+            @RequestBody ResetPasswordRequest request
     ) {
-        User user = userRepository.findByEmail(email)
+        User user = userRepository.findByEmail(request.getEmail())
                 .orElseThrow(() -> new UserNotFoundException("User not found"));
 
-        if (!passwordResetService.veryOtp(user, otp)) {
+        if (!passwordResetService.veryOtp(user, request.getOtp())) {
             return ResponseEntity.badRequest().body(new ApiResponse<>(
                     "error",
                     "Invalid or expired OTP",
@@ -165,7 +164,7 @@ public class AuthController {
             ));
         }
 
-        user.setPassword(passwordEncoder.encode(newPassword));
+        user.setPassword(passwordEncoder.encode(request.getNewPassword()));
         userRepository.save(user);
 
         return ResponseEntity.ok(new ApiResponse<>(
@@ -175,8 +174,6 @@ public class AuthController {
                 200
         ));
     }
-
-
 
 
 //    @PostMapping("/login")

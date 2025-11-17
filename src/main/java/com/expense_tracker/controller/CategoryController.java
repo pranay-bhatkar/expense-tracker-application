@@ -1,5 +1,6 @@
 package com.expense_tracker.controller;
 
+import com.expense_tracker.exception.UserNotFoundException;
 import com.expense_tracker.model.Category;
 import com.expense_tracker.repository.CategoryRepository;
 import com.expense_tracker.repository.UserRepository;
@@ -33,9 +34,10 @@ public class CategoryController {
         Long userId = null;
         if (userDetails != null) {
             userId = userRepository.findByEmail(userDetails.getUsername())
-                    .orElseThrow(() -> new RuntimeException("User not found"))
+                    .orElseThrow(() -> new UserNotFoundException("User not found"))
                     .getId();
         }
+
         category.setUserId(userId);
 
         // Check for duplicates
@@ -66,7 +68,7 @@ public class CategoryController {
         Long userId = null;
         if (userDetails != null) {
             userId = userRepository.findByEmail(userDetails.getUsername())
-                    .orElseThrow(() -> new RuntimeException("User not found"))
+                    .orElseThrow(() -> new UserNotFoundException("User not found"))
                     .getId();
         }
 
