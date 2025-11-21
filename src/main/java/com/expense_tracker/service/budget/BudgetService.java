@@ -1,16 +1,17 @@
-package com.expense_tracker.service;
+package com.expense_tracker.service.budget;
 
 import com.expense_tracker.dto.budget.BudgetRequestDTO;
 import com.expense_tracker.dto.budget.BudgetResponseDTO;
 import com.expense_tracker.exception.AccessDeniedException;
 import com.expense_tracker.exception.ResourceNotFoundException;
-import com.expense_tracker.model.Budget;
+import com.expense_tracker.model.budget.Budget;
 import com.expense_tracker.model.Category;
 import com.expense_tracker.model.Transaction;
 import com.expense_tracker.model.User;
-import com.expense_tracker.repository.BudgetRepository;
+import com.expense_tracker.repository.budget.BudgetRepository;
 import com.expense_tracker.repository.CategoryRepository;
 import com.expense_tracker.repository.TransactionRepository;
+import com.expense_tracker.service.UserService;
 import com.expense_tracker.utility.mapper.BudgetMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
