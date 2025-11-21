@@ -2,23 +2,25 @@ package com.expense_tracker.dto;
 
 import com.expense_tracker.model.Role;
 
-import java.time.LocalDate;
+
+import java.time.LocalDateTime;
 
 public class UserResponseDTO {
     private Long id;
     private String name;
     private String email;
     private Role role;
-    private LocalDate createdAt;
+    private LocalDateTime createdAt;
 
     public UserResponseDTO() {
     }
 
-    public UserResponseDTO(Long id, String name, String email, Role role) {
+    public UserResponseDTO(Long id, String name, String email, Role role,LocalDateTime createdAt) {
         this.id = id;
         this.name = name;
         this.email = email;
         this.role = role;
+        this.createdAt = createdAt;
     }
 
     public Long getId() {
@@ -53,11 +55,11 @@ public class UserResponseDTO {
         this.role = role;
     }
 
-    public LocalDate getCreatedAt() {
+    public LocalDateTime getCreatedAt() {
         return createdAt;
     }
 
-    public void setCreatedAt(LocalDate createdAt) {
+    public void setCreatedAt(LocalDateTime createdAt) {
         this.createdAt = createdAt;
     }
 }

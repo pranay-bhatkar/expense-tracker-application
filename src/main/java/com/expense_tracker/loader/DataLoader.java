@@ -19,7 +19,6 @@ public class DataLoader implements CommandLineRunner {
             categoryRepository.save(new Category("Travel", TransactionType.EXPENSE, "✈️", null));
             categoryRepository.save(new Category("Rent", TransactionType.EXPENSE, "🏠", null));
             categoryRepository.save(new Category("Salary", TransactionType.INCOME, "💰", null));
-
         }
     }
 }

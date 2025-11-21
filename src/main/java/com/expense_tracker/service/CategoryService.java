@@ -1,5 +1,6 @@
 package com.expense_tracker.service;
 
+import com.expense_tracker.exception.ResourceNotFoundException;
 import com.expense_tracker.model.Category;
 import com.expense_tracker.repository.CategoryRepository;
 import lombok.RequiredArgsConstructor;
@@ -50,13 +51,14 @@ public class CategoryService {
     @Transactional
     public void deleteCategory(Long id) {
         Category category = categoryRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Category not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Category not found"));
 
         if (category.isDeleted()) {
-            throw new RuntimeException("Category is already deleted");
+            throw new ResourceNotFoundException("Category is already deleted");
         }
 
         category.setDeleted(true);  // soft delete
+
         // updatedAt will automatically set if @UpdateTimestamp exists
         categoryRepository.save(category);
     }

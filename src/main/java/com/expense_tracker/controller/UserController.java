@@ -51,9 +51,11 @@ public class UserController {
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "5") int size,
             @RequestParam(defaultValue = "id") String sortBy,
-            @RequestParam(defaultValue = "asc") String sortDir
+            @RequestParam(defaultValue = "asc") String sortDir,
+            @RequestParam(defaultValue = "false") boolean all
+
     ) {
-        Page<User> userPage = userService.getAllUsers(page, size, sortBy, sortDir);
+        Page<User> userPage = userService.getAllUsers(page, size, sortBy, sortDir, all);
 
         Map<String, Object> responseData = new HashMap<>();
         List<UserResponseDTO> usersDto = userPage.getContent().stream()
@@ -70,7 +72,7 @@ public class UserController {
 
         ApiResponse<Map<String, Object>> response = new ApiResponse<>(
                 "success",
-                "Fetched paginated users successfully",
+                all ? "Fetched all users successfully" : "Fetched paginated users successfully",
                 responseData,
                 HttpStatus.OK.value()
         );
@@ -115,10 +117,13 @@ public class UserController {
     // Admin removes a user.
     @DeleteMapping("/{id}")
     public ResponseEntity<ApiResponse<Void>> deleteUser(@PathVariable Long id) {
-        userService.deleteUser(id);
+        User deletedUser =  userService.deleteUser(id);
+
+        String message = deletedUser.getName() + "user deleted successfully";
+
         ApiResponse<Void> response = new ApiResponse<>(
                 "success",
-                "User deleted successfully",
+                message,
                 null,
                 HttpStatus.OK.value()
         );

@@ -6,12 +6,10 @@ import com.expense_tracker.model.Role;
 import com.expense_tracker.model.User;
 import com.expense_tracker.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.*;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Map;
@@ -27,6 +25,7 @@ public class UserService {
     private PasswordEncoder passwordEncoder;
 
 
+    @Transactional
     public User saveUser(User user) {
 
         if (userRepository.findByEmail(user.getEmail()).isPresent()) {
@@ -43,15 +42,22 @@ public class UserService {
         return userRepository.save(user);
     }
 
-    public Page<User> getAllUsers(int page, int size, String sortBy, String sortDir) {
+    public Page<User> getAllUsers(int page, int size, String sortBy, String sortDir, boolean all) {
         Sort sort = sortDir.equalsIgnoreCase("desc") ? Sort.by(sortBy).descending() : Sort.by(sortBy).ascending();
 
-        Pageable pageable = PageRequest.of(page, size, sort);
-
-        Page<User> usersPage = userRepository.findAll(pageable);
-        if (usersPage.isEmpty()) {
-            throw new UserNotFoundException("No users found in the system");
+        if (all) {
+            // Return all users as a single page
+            List<User> allUsers = userRepository.findAll(sort);
+            return new PageImpl<>(allUsers); // wrap list in a Page
         }
+
+        Pageable pageable = PageRequest.of(page, size, sort);
+        Page<User> usersPage = userRepository.findAll(pageable);
+
+        if (usersPage.isEmpty()) {
+            throw new UserNotFoundException("No users found for page: " + page);
+        }
+
         return usersPage;
     }
 
@@ -65,11 +71,13 @@ public class UserService {
                 .orElseThrow(() -> new UserNotFoundException("User not found with email " + email));
     }
 
-    public void deleteUser(Long id) {
-        if (!userRepository.existsById(id)) {
-            throw new UserNotFoundException("User not found with ID : " + id);
-        }
+    public User deleteUser(Long id) {
+        User user = userRepository.findById(id)
+                        .orElseThrow(() -> new UserNotFoundException("User not found with : " + id));
+
         userRepository.deleteById(id);
+
+        return user;
     }
 
     // update all user details { put }

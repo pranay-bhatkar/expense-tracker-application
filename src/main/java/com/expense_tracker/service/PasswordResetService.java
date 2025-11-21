@@ -1,6 +1,7 @@
 package com.expense_tracker.service;
 
 
+import com.expense_tracker.exception.InvalidTokenException;
 import com.expense_tracker.model.PasswordResetOtp;
 import com.expense_tracker.model.User;
 import com.expense_tracker.repository.PasswordResetOtpRepository;
@@ -18,6 +19,9 @@ public class PasswordResetService {
 
 
     public void generateOtp(User user) {
+
+        otpRepository.deleteByUser(user);
+
         String otp = String.format("%6d", new Random().nextInt(999999));
 
         PasswordResetOtp resetOtp = new PasswordResetOtp();
@@ -37,10 +41,17 @@ public class PasswordResetService {
     }
 
 
-    public boolean veryOtp(User user, String otp) {
-        return otpRepository.findByOtpAndUser(otp, user)
-                .filter(o -> o.getExpiryTime().isAfter(LocalDateTime.now()))
-                .isPresent();
+    public boolean verifyOtp(User user, String otp) {
+       PasswordResetOtp storedOtp = otpRepository.findByOtpAndUser(otp,user)
+               .orElseThrow(() -> new InvalidTokenException("Invalid OTP"));
+
+       if(storedOtp.getExpiryTime().isBefore(LocalDateTime.now())) {
+           throw  new InvalidTokenException("OTP expired");
+       }
+
+       otpRepository.delete(storedOtp);
+
+        return true;
     }
 
 }

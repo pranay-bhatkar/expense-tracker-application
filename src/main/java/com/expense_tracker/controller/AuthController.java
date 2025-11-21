@@ -62,9 +62,10 @@ public class AuthController {
                 savedUser.getId(),
                 savedUser.getName(),
                 savedUser.getEmail(),
-                savedUser.getRole()
+                savedUser.getRole(),
+                savedUser.getCreatedAt()
         );
-        responseDTO.setCreatedAt(savedUser.getCreatedAt().toLocalDate()); // <-- add this
+        responseDTO.setCreatedAt(savedUser.getCreatedAt()); // <-- add this
 
 
         return ResponseEntity.status(HttpStatus.CREATED)
@@ -155,14 +156,7 @@ public class AuthController {
         User user = userRepository.findByEmail(request.getEmail())
                 .orElseThrow(() -> new UserNotFoundException("User not found"));
 
-        if (!passwordResetService.veryOtp(user, request.getOtp())) {
-            return ResponseEntity.badRequest().body(new ApiResponse<>(
-                    "error",
-                    "Invalid or expired OTP",
-                    null,
-                    400
-            ));
-        }
+       passwordResetService.verifyOtp(user, request.getOtp());
 
         user.setPassword(passwordEncoder.encode(request.getNewPassword()));
         userRepository.save(user);
