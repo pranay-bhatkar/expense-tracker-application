@@ -26,7 +26,7 @@ public class BudgetHistoryController {
 
         ApiResponse<List<BudgetHistory>> response = new ApiResponse<>(
                 "success",
-                "User created successfully",
+                "History fetched successfully",
                 history,
                 HttpStatus.CREATED.value()
         );

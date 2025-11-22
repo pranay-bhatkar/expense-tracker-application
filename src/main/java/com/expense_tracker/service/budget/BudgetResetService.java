@@ -4,6 +4,7 @@ import com.expense_tracker.model.budget.Budget;
 import com.expense_tracker.model.budget.BudgetHistory;
 import com.expense_tracker.repository.budget.BudgetHistoryRepository;
 import com.expense_tracker.repository.budget.BudgetRepository;
+import com.expense_tracker.service.notification.NotificationService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
@@ -18,6 +19,7 @@ public class BudgetResetService {
 
     private final BudgetRepository budgetRepository;
     private final BudgetHistoryRepository budgetHistoryRepository;
+    private final NotificationService notificationService;
 
     // Runs every month at midnight on 1st day
     @Scheduled(cron = "0 0 0 1 * *")
@@ -29,6 +31,7 @@ public class BudgetResetService {
         // Fetch only budgets from previous month
         List<Budget> budgetsToReset = budgetRepository.findByMonthAndYear(previousMonth, previousYear);
 
+        // Archive previous month budgets
         List<BudgetHistory> historyList = budgetsToReset.stream()
                 .map(budget -> BudgetHistory.builder()
                         .originalBudgetId(budget.getId())
@@ -42,14 +45,22 @@ public class BudgetResetService {
                         .build()
                 ).toList();
 
-        budgetRepository.saveAll(budgetsToReset);
+        budgetHistoryRepository.saveAll(historyList);
 
         // Reset budgets for new month
         for (Budget budget : budgetsToReset) {
             budget.setSpent(0.0);
             budget.setMonth(now.getMonthValue());
             budget.setYear(now.getYear());
+
+            // Send new month budget notification to each user
+            notificationService.sendNotification(
+                    budget.getUser(),
+                    "Your new month budget is ready for " + now.getMonth() + " " + now.getYear()
+            );
         }
+
+        budgetRepository.saveAll(budgetsToReset);
 
         System.out.println("Monthly budgets reset successfully for " +
                 now.getMonth() + " " + now.getYear());

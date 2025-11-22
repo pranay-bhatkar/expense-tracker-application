@@ -1,4 +1,4 @@
-package com.expense_tracker.controller;
+package com.expense_tracker.controller.budget;
 
 import com.expense_tracker.dto.budget.BudgetRequestDTO;
 import com.expense_tracker.dto.budget.BudgetResponseDTO;

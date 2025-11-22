@@ -4,14 +4,15 @@ import com.expense_tracker.dto.budget.BudgetRequestDTO;
 import com.expense_tracker.dto.budget.BudgetResponseDTO;
 import com.expense_tracker.exception.AccessDeniedException;
 import com.expense_tracker.exception.ResourceNotFoundException;
-import com.expense_tracker.model.budget.Budget;
 import com.expense_tracker.model.Category;
 import com.expense_tracker.model.Transaction;
 import com.expense_tracker.model.User;
-import com.expense_tracker.repository.budget.BudgetRepository;
+import com.expense_tracker.model.budget.Budget;
 import com.expense_tracker.repository.CategoryRepository;
 import com.expense_tracker.repository.TransactionRepository;
+import com.expense_tracker.repository.budget.BudgetRepository;
 import com.expense_tracker.service.UserService;
+import com.expense_tracker.service.notification.NotificationService;
 import com.expense_tracker.utility.mapper.BudgetMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -26,6 +27,7 @@ public class BudgetService {
     private final CategoryRepository categoryRepository;
     private final UserService userService; // to get logged-in user
     private final TransactionRepository transactionRepository;
+    private final NotificationService notificationService;
 
     public BudgetResponseDTO createBudget(BudgetRequestDTO dto) {
         User user = userService.getCurrentUser();
@@ -122,6 +124,14 @@ public class BudgetService {
                     double spent = calculateSpent(categoryId, user.getId(), month, year);
                     budget.setSpent(spent);
                     budgetRepository.save(budget);
+
+                    if (spent > budget.getAmount()) {
+                        notificationService.sendNotification(
+                                user,
+                                "Budget exceeded for " + (budget.getCategory() != null ?
+                                        budget.getCategory().getName() : "Overall") + " in " + month + " / " + year
+                        );
+                    }
                 });
 
         // update overall budget
@@ -135,6 +145,13 @@ public class BudgetService {
                     double spent = calculateSpent(null, user.getId(), month, year);
                     budget.setSpent(spent);
                     budgetRepository.save(budget);
+
+                    if (spent > budget.getAmount()) {
+                        notificationService.sendNotification(
+                                user,
+                                "Overall monthly budget exceeded in " + month + "/" + year
+                        );
+                    }
                 });
 
 
