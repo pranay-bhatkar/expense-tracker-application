@@ -6,6 +6,8 @@ import lombok.Data;
 @Data
 @Builder
 public class AdminDashboardDTO {
+    private static final long serialVersionUID = 1L;
+
     private long totalUsers;
     private long activeUsers;
     private long totalTransactions;
