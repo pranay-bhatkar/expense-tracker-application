@@ -124,7 +124,6 @@
         </dependency>
 
 
-
         <dependency>
             <groupId>com.github.librepdf</groupId>
             <artifactId>openpdf</artifactId>
@@ -159,6 +158,14 @@
             <groupId>org.jfree</groupId>
             <artifactId>jfreechart</artifactId>
             <version>1.5.3</version>
+        </dependency>
+
+
+        <!-- dotenv env       -->
+        <dependency>
+            <groupId>io.github.cdimascio</groupId>
+            <artifactId>dotenv-java</artifactId>
+            <version>2.2.4</version>
         </dependency>
 
 
