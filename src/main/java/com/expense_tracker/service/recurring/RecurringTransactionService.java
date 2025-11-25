@@ -84,7 +84,7 @@ public class RecurringTransactionService {
             String message = "Recurring transaction of amount " + recurring.getAmount() +
                     " for " + (recurring.getCategory() != null ? recurring.getCategory().getName() : "General") +
                     " has been recorded today.";
-            notificationService.sendNotification(recurring.getUser(), message);
+            notificationService.sendNotification(recurring.getUser(), "Recurring Payment Processed ✔", message);
 
             // Update next execution date
             switch (recurring.getFrequency()) {

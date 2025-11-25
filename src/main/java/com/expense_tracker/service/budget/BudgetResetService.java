@@ -55,7 +55,7 @@ public class BudgetResetService {
 
             // Send new month budget notification to each user
             String message = "Your new month budget is ready for " + now.getMonth() + " " + now.getYear();
-            notificationService.sendNotification(budget.getUser(), message);
+            notificationService.sendNotification(budget.getUser(),"Monthly budget reset", message);
         }
 
         budgetRepository.saveAll(budgetsToReset);

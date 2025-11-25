@@ -23,20 +23,22 @@ public class NotificationService {
 
     // In-app + email notification
     @Async
-    public void sendNotification(User user, String message) {
+    public void sendNotification(User user, String title, String message) {
         // save in-app notification
         Notification notification = Notification.builder()
                 .user(user)
+                .title(title)
                 .message(message)
                 .read(false)
                 .build();
+
         notificationsRepository.save(notification);
 
         // send email notifications
         if (user.getEmail() != null && !user.getEmail().isEmpty()) {
             SimpleMailMessage mailMessage = new SimpleMailMessage();
             mailMessage.setTo(user.getEmail());
-            mailMessage.setSubject("Expense Tracker Notification");
+            mailMessage.setSubject(title);
             mailMessage.setText(message);
             mailSender.send(mailMessage);
         }
@@ -55,7 +57,21 @@ public class NotificationService {
                 .orElseThrow(() -> new ResourceNotFoundException(
                         "Notification with id " + notificationId + " not found"
                 ));
-
+        notification.setRead(true);
+        notificationsRepository.save(notification);
 
     }
+
+
+    public void markAllAsRead(User user) {
+        List<Notification> unread = notificationsRepository
+                .findByUserIdAndReadFalseOrderByCreatedAtDesc(user.getId());
+
+        unread.forEach(n -> n.setRead(true));
+
+        notificationsRepository.saveAll(unread);
+    }
+
+
+
 }

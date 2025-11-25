@@ -143,53 +143,25 @@ public class BudgetService {
         int year = transaction.getDate().getYear();
         Long categoryId = transaction.getCategory() != null ? transaction.getCategory().getId() : null;
 
-        // update category budget
-        budgetRepository.findByUserIdAndMonthAndYearAndCategoryId(
-                        user.getId(),
-                        month,
-                        year,
-                        categoryId
-                )
+        // 1️⃣ Update Category Budget (categoryId != null)
+        budgetRepository.findByUserIdAndMonthAndYearAndCategoryId(user.getId(), month, year, categoryId)
                 .ifPresent(budget -> {
                     double spent = calculateSpent(categoryId, user.getId(), month, year);
                     budget.setSpent(spent);
                     budgetRepository.save(budget);
 
-                    // Inside updateSpentForBudget() after calculating spent
-                    if (spent > budget.getAmount()) {
-                        String message = "Budget exceeded for " +
-                                (budget.getCategory() != null ? budget.getCategory().getName() : "Overall") +
-                                " in " + month + "/" + year;
-
-                        notificationService.sendNotification(user, message);
-                    }
-
+                    handleBudgetNotifications(user, budget, spent, month, year);
                 });
 
-        // update overall budget
-        budgetRepository.findByUserIdAndMonthAndYearAndCategoryId(
-                        user.getId(),
-                        month,
-                        year,
-                        null
-                )
+        // 2️⃣ Update Overall Budget (categoryId == null)
+        budgetRepository.findByUserIdAndMonthAndYearAndCategoryId(user.getId(), month, year, null)
                 .ifPresent(budget -> {
                     double spent = calculateSpent(null, user.getId(), month, year);
                     budget.setSpent(spent);
                     budgetRepository.save(budget);
 
-                    // Inside updateSpentForBudget() after calculating spent
-                    if (spent > budget.getAmount()) {
-                        String message = "Budget exceeded for " +
-                                (budget.getCategory() != null ? budget.getCategory().getName() : "Overall") +
-                                " in " + month + "/" + year;
-
-                        notificationService.sendNotification(user, message);
-                    }
-
+                    handleBudgetNotifications(user, budget, spent, month, year);
                 });
-
-
     }
 
     /* Helper: calculate spent amount */
@@ -242,5 +214,33 @@ public class BudgetService {
 //        if (newAmount < oldAmount) return "DECREASE";
 //        return "NO CHANGE";
 //    }
+
+
+    // handle notifications
+    private void handleBudgetNotifications(User user, Budget budget, double spent, int month, int year) {
+
+        double limit = budget.getAmount();
+        String categoryName =
+                (budget.getCategory() != null ? budget.getCategory().getName() : "Overall Budget");
+
+        // 💥 1️⃣ Budget Exceeded
+        if (spent >= limit) {
+            notificationService.sendNotification(
+                    user,
+                    "Budget Exceeded 🚨",
+                    "You exceeded the budget for " + categoryName + " in " + month + "/" + year
+            );
+            return;
+        }
+
+        // ⚠ 2️⃣ 80% Warning
+        if (spent >= limit * 0.8) {
+            notificationService.sendNotification(
+                    user,
+                    "Budget Warning ⚠",
+                    "You have reached 80% of your " + categoryName + " budget."
+            );
+        }
+    }
 
 }

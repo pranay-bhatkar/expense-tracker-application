@@ -7,7 +7,7 @@ import com.expense_tracker.model.Transaction;
 import com.expense_tracker.model.TransactionType;
 import com.expense_tracker.repository.UserRepository;
 import com.expense_tracker.response.ApiResponse;
-import com.expense_tracker.service.TransactionService;
+import com.expense_tracker.service.transaction.TransactionService;
 import com.expense_tracker.service.UserService;
 import com.expense_tracker.utility.mapper.TransactionMapper;
 import lombok.RequiredArgsConstructor;

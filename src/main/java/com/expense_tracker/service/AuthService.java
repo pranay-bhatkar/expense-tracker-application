@@ -9,6 +9,7 @@ import com.expense_tracker.model.RefreshToken;
 import com.expense_tracker.model.User;
 import com.expense_tracker.repository.UserRepository;
 import com.expense_tracker.security.JwtService;
+import com.expense_tracker.service.notification.NotificationService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -26,6 +27,7 @@ public class AuthService implements UserDetailsService {
     private final PasswordEncoder passwordEncoder;
     private final JwtService jwtService;
     private final RefreshTokenService refreshTokenService;
+    private final NotificationService notificationService;
 
     @Override
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
@@ -110,7 +112,7 @@ public class AuthService implements UserDetailsService {
 
         // Check for existing valid refresh token
         RefreshToken existingToken = refreshTokenService.findTopByUser(user)
-                .filter(rt -> refreshTokenService.verifyExpiration(rt))
+                .filter(refreshTokenService::verifyExpiration)
                 .orElseGet(() -> refreshTokenService.createRefreshToken(user.getId()));
 
         // generate tokens
@@ -119,6 +121,12 @@ public class AuthService implements UserDetailsService {
 
         // get the refresh token string from the object
         String refreshToken = existingToken.getToken();
+
+        notificationService.sendNotification(
+                user,
+                "🔐 Login Successful",
+                "You logged in at " + LocalDateTime.now()
+        );
 
         return new AuthResponse(accessToken, refreshToken, jwtService.getExpiryInSeconds());
     }
@@ -144,6 +152,16 @@ public class AuthService implements UserDetailsService {
     public void logout(String refreshToken) {
         RefreshToken rt = refreshTokenService.findByToken(refreshToken)
                 .orElseThrow(() -> new InvalidTokenException("Invalid refresh token"));
+
+        User user = rt.getUser();
+
+        notificationService.sendNotification(
+                user,
+                "🚪 Logout Successful",
+                "You logged out at " + LocalDateTime.now()
+        );
+
+        // revoke token
         refreshTokenService.revoke(rt);
     }
 

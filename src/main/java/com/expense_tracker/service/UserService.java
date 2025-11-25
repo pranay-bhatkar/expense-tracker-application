@@ -6,6 +6,7 @@ import com.expense_tracker.exception.UserNotFoundException;
 import com.expense_tracker.model.Role;
 import com.expense_tracker.model.User;
 import com.expense_tracker.repository.UserRepository;
+import com.expense_tracker.service.notification.NotificationService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.*;
 import org.springframework.security.core.Authentication;
@@ -26,6 +27,9 @@ public class UserService {
 
     @Autowired
     private PasswordEncoder passwordEncoder;
+
+    @Autowired
+    private NotificationService notificationService;
 
 
     @Transactional
@@ -88,6 +92,9 @@ public class UserService {
         User existingUser = userRepository.findById(id).orElseThrow(()
                 -> new UserNotFoundException("User not found with ID : " + id));
 
+        String oldEmail = existingUser.getEmail(); // store previous email
+
+
         // check for duplicates email (except current user)
         if (userRepository.findByEmail(updateUser.getEmail()).filter(
                 user -> !user.getId().equals(id)).isPresent()) {
@@ -103,7 +110,26 @@ public class UserService {
         if (updateUser.getPassword() != null && !updateUser.getPassword().isBlank()) {
             existingUser.setPassword(passwordEncoder.encode(updateUser.getPassword()));
         }
-        return userRepository.save(existingUser);
+
+        User savedUser = userRepository.save(existingUser);
+
+        notificationService.sendNotification(
+                savedUser,
+                "👤 Profile Updated",
+                "Your profile information was updated."
+        );
+
+        //  Send Email Updated Notification ONLY IF email changed
+        if (!oldEmail.equals(updateUser.getEmail())) {
+            notificationService.sendNotification(
+                    existingUser,
+                    "📧 Email Updated",
+                    "Your email address was changed from: " + oldEmail +
+                            " → " + updateUser.getEmail()
+            );
+        }
+
+        return savedUser;
     }
 
 
@@ -123,10 +149,22 @@ public class UserService {
                 case "name" -> existingUser.setName((String) value);
 
                 case "email" -> {
+
+                    String oldEmail = existingUser.getEmail();
+                    String newEmail = (String) value;
+
                     if (userRepository.findByEmail((String) value).filter(user -> !user.getId().equals(id)).isPresent()) {
                         throw new UserAlreadyExistException("Email already in use : " + value);
                     }
-                    existingUser.setEmail((String) value);
+                    existingUser.setEmail(newEmail);
+
+                    if (!oldEmail.equals(newEmail)) {
+                        notificationService.sendNotification(
+                                existingUser,
+                                "📧 Email Updated",
+                                "Your email was changed from: " + oldEmail + " → " + newEmail
+                        );
+                    }
                 }
 
                 case "password" -> existingUser.setPassword(passwordEncoder.encode((String) value));

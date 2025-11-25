@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"/>
+    <title>Monthly Statement</title>
+    <style>
+        body { font-family: "Helvetica", Arial, sans-serif; color: #333; background: #f5f7fb; }
+
+        .header { display:flex; align-items:center; gap:16px; margin-bottom:18px; }
+        .logo { width:80px; height:80px; object-fit:contain; }
+        .title { font-size:22px; font-weight:700; color:#2f3d8a; }
+        .meta { font-size:12px; color:#777; }
+
+        .card-row { display:flex; gap:12px; margin-bottom:18px; }
+        .card {
+          flex:1;
+          border-radius:8px;
+          padding:12px;
+          color: #fff;
+          box-shadow: 0 6px 14px rgba(20,30,80,0.08);
+        }
+        .card .label { font-size:12px; opacity:0.9; }
+        .card .value { font-size:18px; font-weight:700; margin-top:6px; }
+
+        .card.income { background: linear-gradient(90deg,#43A047,#66BB6A); }
+        .card.expense{ background: linear-gradient(90deg,#E53935,#FF6F61); }
+        .card.savings{ background: linear-gradient(90deg,#FB8C00,#FFA726); }
+
+        .section { background:#fff; border-radius:8px; padding:12px; margin-bottom:16px; box-shadow: 0 4px 12px rgba(20,30,80,0.04); }
+        .section h3 { margin:0 0 10px 0; color:#1a73e8; font-size:16px; }
+
+        .category-list { margin:0; padding:0; list-style:none; }
+        .category-item { display:flex; justify-content:space-between; padding:8px 0; border-bottom:1px solid #f0f2f7; }
+        .category-item:last-child{ border-bottom:none; }
+
+        table.transactions { width:100%; border-collapse:collapse; margin-top:8px; font-size:12px; }
+        table.transactions thead th {
+          background:#1e88e5; color:#fff; padding:10px; text-align:left; font-size:12px;
+        }
+        table.transactions tbody td { padding:10px; border-bottom:1px solid #eef2fa; vertical-align:middle; }
+        table.transactions tbody tr:nth-child(even){ background:#fbfdff; }
+
+        .footer { text-align:center; font-size:11px; color:#888; margin-top:18px; }
+
+    </style>
+
+</head>
+<body>
+
+<div class="header">
+    <div>
+        <img th:if="${logoBase64 != null}" th:src="${'data:image/png;base64,' + logoBase64}" class="logo" alt="logo"/>
+    </div>
+    <div>
+        <div class="title">Expense Tracker — Monthly Statement</div>
+        <div class="meta" th:text="${user.name + ' • ' + month + ' / ' + year}">User • Month / Year</div>
+    </div>
+</div>
+
+<table style="width: 100%; margin-bottom: 16px;">
+    <tr>
+        <td style="background-color: #43A047; padding: 12px; color: white; border-radius: 6px;">
+            <div>Total Income</div>
+            <div style="font-size: 18px; font-weight: bold;" th:text="${income}">0.00</div>
+        </td>
+
+        <td style="background-color: #E53935; padding: 12px; color: white; border-radius: 6px;">
+            <div>Total Expense</div>
+            <div style="font-size: 18px; font-weight: bold;" th:text="${expense}">0.00</div>
+        </td>
+
+        <td style="background-color: #FB8C00; padding: 12px; color: white; border-radius: 6px;">
+            <div>Net Savings</div>
+            <div style="font-size: 18px; font-weight: bold;" th:text="${savings}">0.00</div>
+        </td>
+    </tr>
+</table>
+
+<div class="section">
+    <h3>Category Breakdown</h3>
+    <ul class="category-list">
+        <li th:each="cat : ${categories}" class="category-item">
+            <span th:text="${cat.name}">Category</span>
+            <strong th:text="${#numbers.formatDecimal(cat.total, 0, 'COMMA', 2, 'POINT')}">0.00</strong>
+        </li>
+        <li th:if="${#lists.isEmpty(categories)}" class="category-item">No categories</li>
+    </ul>
+</div>
+
+<div class="section">
+    <h3>Transactions</h3>
+    <table class="transactions">
+        <thead>
+        <tr>
+            <th>Sr</th>
+            <th>Date</th>
+            <th>Amount</th>
+            <th>Type</th>
+            <th>Category</th>
+            <th>Notes</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each="t,iterStat : ${transactions}">
+            <td th:text="${iterStat.index + 1}">1</td>
+            <td th:text="${t.date}">2025-11-22</td>
+            <td th:text="${#numbers.formatDecimal(t.amount, 0, 'COMMA', 2, 'POINT')}">0.00</td>
+            <td th:text="${t.type}">EXPENSE</td>
+            <td th:text="${t.category != null ? t.category.name : 'Uncategorized'}">Cat</td>
+            <td th:text="${t.notes}">-</td>
+        </tr>
+        <tr th:if="${#lists.isEmpty(transactions)}">
+            <td colspan="6" style="text-align:center; padding:18px;">No transactions found for this period</td>
+        </tr>
+        </tbody>
+    </table>
+</div>
+
+<div class="footer">Generated on <span th:text="${generatedDate}">DATE</span> • Expense Tracker</div>
+
+</body>
+</html>

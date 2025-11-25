@@ -1,6 +1,9 @@
 package com.expense_tracker.controller;
 
-import com.expense_tracker.dto.*;
+import com.expense_tracker.dto.AuthResponse;
+import com.expense_tracker.dto.EmailRequest;
+import com.expense_tracker.dto.LoginRequest;
+import com.expense_tracker.dto.ResetPasswordRequest;
 import com.expense_tracker.dto.user.UserRequestDTO;
 import com.expense_tracker.dto.user.UserResponseDTO;
 import com.expense_tracker.exception.UserNotFoundException;
@@ -11,6 +14,7 @@ import com.expense_tracker.response.ApiResponse;
 import com.expense_tracker.service.AuthService;
 import com.expense_tracker.service.PasswordResetService;
 import com.expense_tracker.service.UserService;
+import com.expense_tracker.service.notification.NotificationService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -21,6 +25,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.time.LocalDateTime;
 import java.util.Map;
 
 @RequiredArgsConstructor
@@ -33,6 +38,7 @@ public class AuthController {
     private final UserRepository userRepository;
     private final PasswordResetService passwordResetService;
     private final PasswordEncoder passwordEncoder;
+    private final NotificationService notificationService;
 
     @PostMapping("/register")
     public ResponseEntity<ApiResponse<UserResponseDTO>> registerUser(
@@ -69,6 +75,12 @@ public class AuthController {
         );
         responseDTO.setCreatedAt(savedUser.getCreatedAt()); // <-- add this
 
+
+        notificationService.sendNotification(
+                savedUser,
+                "🎉 Welcome to Expense Tracker!",
+                "Your account has been successfully created."
+        );
 
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(new ApiResponse<>(
@@ -162,6 +174,14 @@ public class AuthController {
 
         user.setPassword(passwordEncoder.encode(request.getNewPassword()));
         userRepository.save(user);
+
+        notificationService.sendNotification(
+                user,
+                "🔒 Password Reset Successful",
+                "Your password was reset at " + LocalDateTime.now() +
+                        ". If this wasn’t you, please secure your account immediately."
+        );
+
 
         return ResponseEntity.ok(new ApiResponse<>(
                 "success",

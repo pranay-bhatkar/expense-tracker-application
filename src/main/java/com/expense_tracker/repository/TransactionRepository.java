@@ -2,6 +2,7 @@ package com.expense_tracker.repository;
 
 import com.expense_tracker.model.Transaction;
 import com.expense_tracker.model.TransactionType;
+import com.expense_tracker.model.User;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -99,4 +100,11 @@ public interface TransactionRepository extends JpaRepository<Transaction, Long> 
     );
 
 
+    List<Transaction> findByRecurringDate(LocalDate tomorrow);
+
+    List<User> findDistinctUsers();
+
+    double sumIncome(Long id, LocalDate start, LocalDate end);
+
+    double sumExpense(Long id, LocalDate start, LocalDate end);
 }

@@ -10,6 +10,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.nio.file.Files;
+import java.nio.file.Paths;
+
 @RestController
 @RequestMapping("/api/reports")
 @RequiredArgsConstructor
@@ -58,6 +61,21 @@ public class ReportsController {
                 .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=transactions.pdf")
                 .contentType(MediaType.APPLICATION_PDF)
                 .body(data);
+    }
+
+    @GetMapping("/monthly/htmlpdf")
+    public ResponseEntity<byte[]> monthlyStatementPdf(
+            @RequestParam int month,
+            @RequestParam int year
+    ) throws Exception {
+        byte[] logoBytes = Files.readAllBytes(Paths.get("src/main/resources/static/images/logo.png"));
+//        reportsService.exportMonthlyHtmlPdf(month, year, logoBytes);
+
+        byte[] pdf = reportsService.exportMonthlyHtmlPdf(month, year, null); // or pass logo bytes
+        return ResponseEntity.ok()
+                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=monthly_statement.pdf")
+                .contentType(MediaType.APPLICATION_PDF)
+                .body(pdf);
     }
 
 }

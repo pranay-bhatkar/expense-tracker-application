@@ -2,11 +2,9 @@ package com.expense_tracker.controller.notification;
 
 import com.expense_tracker.dto.notification.NotificationResponseDTO;
 import com.expense_tracker.model.User;
-import com.expense_tracker.model.notification.Notification;
 import com.expense_tracker.response.ApiResponse;
 import com.expense_tracker.service.UserService;
 import com.expense_tracker.service.notification.NotificationService;
-import com.expense_tracker.utility.mapper.NotificationMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -54,5 +52,18 @@ public class NotificationController {
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
+    @PutMapping("/read-all")
+    public ResponseEntity<ApiResponse<String>> markAllAsRead() {
+        User user = userService.getCurrentUser();
+        notificationService.markAllAsRead(user);
+        ApiResponse<String> response = new ApiResponse<>(
+                "success",
+                "All notifications marked as read",
+                null,
+                HttpStatus.CREATED.value()
+        );
+
+        return ResponseEntity.ok(response);
+    }
 
 }

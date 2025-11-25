@@ -1,4 +1,4 @@
-package com.expense_tracker.service;
+package com.expense_tracker.service.transaction;
 
 import com.expense_tracker.dto.transaction.TransactionRequestDTO;
 import com.expense_tracker.exception.ResourceNotFoundException;
@@ -8,6 +8,7 @@ import com.expense_tracker.model.TransactionType;
 import com.expense_tracker.model.User;
 import com.expense_tracker.repository.CategoryRepository;
 import com.expense_tracker.repository.TransactionRepository;
+import com.expense_tracker.service.UserService;
 import com.expense_tracker.service.budget.BudgetService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -50,7 +51,9 @@ public class TransactionService {
 
         Transaction saved = transactionRepository.save(transaction);
 
-        // 🚀 Update budget after creating transaction
+
+
+        // Update budget after creating transaction
         budgetService.updateSpentForBudget(saved);
 
         return saved;
