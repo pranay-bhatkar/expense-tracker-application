@@ -5,6 +5,7 @@ import com.expense_tracker.dto.admin.AdminDashboardDTO;
 import com.expense_tracker.dto.user.UserResponseDTO;
 import com.expense_tracker.repository.TransactionRepository;
 import com.expense_tracker.service.UserService;
+import com.expense_tracker.service.admin.AdminService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
@@ -20,6 +21,9 @@ public class AdminController {
 
     private final UserService userService;
     private final TransactionRepository transactionRepository;
+
+
+    private final AdminService adminService;
 
     // 1. List all users
     @GetMapping("/users")
@@ -38,23 +42,8 @@ public class AdminController {
     // 2. System stats / dashboard
     @GetMapping("/analytics")
     public ResponseEntity<AdminDashboardDTO> getSystemStats() {
-
-        long totalUsers = userService.countAllUsers();
-        long activeUsers = userService.countActiveUsers();
-        long totalTransactions = transactionRepository.count();
-        double totalIncome = transactionRepository.sumAllIncome();
-        double totalExpense = transactionRepository.sumAllExpenses();
-        long recurringPayments = transactionRepository.countRecurringTransactions();
-
-        AdminDashboardDTO dto = AdminDashboardDTO.builder()
-                .totalUsers(totalUsers)
-                .activeUsers(activeUsers)
-                .totalTransactions(totalTransactions)
-                .totalIncome(totalIncome)
-                .totalExpense(totalExpense)
-                .recurringPayments(recurringPayments)
-                .build();
-
+        AdminDashboardDTO dto = adminService.getDashboardStats(); // cached automatically
         return ResponseEntity.ok(dto);
+
     }
 }

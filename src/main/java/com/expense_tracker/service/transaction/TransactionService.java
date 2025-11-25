@@ -9,6 +9,7 @@ import com.expense_tracker.model.User;
 import com.expense_tracker.repository.CategoryRepository;
 import com.expense_tracker.repository.TransactionRepository;
 import com.expense_tracker.service.UserService;
+import com.expense_tracker.service.admin.AdminService;
 import com.expense_tracker.service.budget.BudgetService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -31,6 +32,7 @@ public class TransactionService {
     private final CategoryRepository categoryRepository;
     private final UserService userService;
     private final BudgetService budgetService;
+    private final AdminService adminService;
 
     public Transaction addTransaction(TransactionRequestDTO dto, Long userId) {
         User user = userService.getUserById(userId);
@@ -52,9 +54,11 @@ public class TransactionService {
         Transaction saved = transactionRepository.save(transaction);
 
 
-
         // Update budget after creating transaction
         budgetService.updateSpentForBudget(saved);
+
+        // Clear Admin Dashboard cache so stats are refreshed
+        adminService.clearDashboardCache();
 
         return saved;
     }
@@ -121,6 +125,8 @@ public class TransactionService {
         budgetService.updateSpentForBudget(oldSnapshot);
         budgetService.updateSpentForBudget(saved);
 
+        adminService.clearDashboardCache(); // clear cache
+
         return saved;
     }
 
@@ -134,6 +140,8 @@ public class TransactionService {
 
         // 🚀 Recalculate budgets after deletion
         budgetService.updateSpentForBudget(t);
+        adminService.clearDashboardCache(); // clear cache
+
     }
 
     public void restore(Long id) {

@@ -30,6 +30,7 @@ public class Notification {
     @Column(name = "is_read", nullable = false)
     private boolean read = false;
 
+    @Builder.Default
     @CreationTimestamp
     @Column(updatable = false)
     private LocalDateTime createdAt = LocalDateTime.now();
