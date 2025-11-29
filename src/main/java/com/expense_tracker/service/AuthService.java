@@ -86,7 +86,7 @@ public class AuthService implements UserDetailsService {
 
     public AuthResponse login(LoginRequest request) {
         User user = userRepository.findByEmail(request.getEmail())
-                .orElseThrow(() -> new RuntimeException("User not found "));
+                .orElseThrow(() -> new UserNotFoundException("User not found "));
 
         // check if account is locked
         if (user.isAccountLocked() && !unlockWhenTimeExpired(user)) {

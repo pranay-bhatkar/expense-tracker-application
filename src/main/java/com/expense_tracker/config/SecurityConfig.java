@@ -33,14 +33,24 @@ public class SecurityConfig {
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
                 .csrf(AbstractHttpConfigurer::disable)
+                .cors(cors ->  {}) // this enables CORS and uses your WebMvcConfigurer
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/api/admin/**").hasRole("ADMIN")
+                        // specific first
+                        .requestMatchers("/api/auth/me").authenticated()
+
+                        // public endpoints
                         .requestMatchers(
-                                "/swagger-ui.html",
-                                "/swagger-ui/**",
-                                "/v3/api-docs/**",
-                                "/api/auth/**"
+                                "/api/auth/login",
+                                "/api/auth/register",
+                                "/api/auth/refresh",
+                                "/api/auth/forgot-password",
+                                "/api/auth/reset-password",
+                                "/api/auth/logout"
                         ).permitAll()
+
+                        .requestMatchers("/swagger-ui.html", "/swagger-ui/**", "/v3/api-docs/**").permitAll()
+
                         .requestMatchers("/api/users/**").authenticated()
                         .requestMatchers("/api/categories/**").authenticated()
                         .requestMatchers("/api/transactions/**").authenticated()

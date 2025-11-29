@@ -15,7 +15,7 @@ public class AdminService {
     private final UserService userService;
     private final TransactionRepository transactionRepository;
 
-    @Cacheable(value = "adminDashboard", key = "#root.methodName")
+//    @Cacheable(value = "adminDashboard", key = "#root.methodName")
     public AdminDashboardDTO getDashboardStats() {
 
         long totalUsers = userService.countAllUsers();

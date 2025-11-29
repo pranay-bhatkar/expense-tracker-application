@@ -72,6 +72,18 @@ public class NotificationService {
         notificationsRepository.saveAll(unread);
     }
 
+    public void deleteNotification(Long notificationId) {
+        Notification notification = notificationsRepository.findById(notificationId)
+                .orElseThrow(() -> new ResourceNotFoundException(
+                        "Notification with id " + notificationId + " not found"
+                ));
+        notificationsRepository.delete(notification);
+    }
+
+
+
+
+
 
 
 }

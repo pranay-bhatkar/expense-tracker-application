@@ -66,4 +66,21 @@ public class NotificationController {
         return ResponseEntity.ok(response);
     }
 
+    @DeleteMapping("/delete/{id}")
+    public ResponseEntity<ApiResponse<String>> deleteNotification(
+            @PathVariable("id") Long notificationId
+    ) {
+        User user = userService.getCurrentUser();
+        notificationService.deleteNotification(notificationId);
+        ApiResponse<String> response = new ApiResponse<>(
+                "success",
+                "Notification deleted successfully",
+                null,
+                HttpStatus.CREATED.value()
+        );
+
+        return ResponseEntity.ok(response);
+    }
+
+
 }

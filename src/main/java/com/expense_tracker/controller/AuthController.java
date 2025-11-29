@@ -20,11 +20,9 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
+import java.security.Principal;
 import java.time.LocalDateTime;
 import java.util.Map;
 
@@ -92,14 +90,46 @@ public class AuthController {
     }
 
 
+//    @PostMapping("/login")
+//    public ResponseEntity<ApiResponse<AuthResponse>> login(@RequestBody LoginRequest request) {
+//        AuthResponse response = authService.login(request);
+//        return ResponseEntity.ok(
+//                new ApiResponse<>(
+//                        "success",
+//                        "Login successful",
+//                        response,
+//                        HttpStatus.OK.value()
+//                )
+//        );
+//    }
+
     @PostMapping("/login")
-    public ResponseEntity<ApiResponse<AuthResponse>> login(@RequestBody LoginRequest request) {
-        AuthResponse response = authService.login(request);
+    public ResponseEntity<ApiResponse<Map<String, Object>>> login(@RequestBody LoginRequest request) {
+        AuthResponse authResponse = authService.login(request);
+
+        // fetch user entity
+        User user = userRepository.findByEmail(request.getEmail())
+                .orElseThrow(() -> new UserNotFoundException("User not found"));
+
+        UserResponseDTO dto = new UserResponseDTO(
+                user.getId(),
+                user.getName(),
+                user.getEmail(),
+                user.getRole(),
+                user.getCreatedAt()
+        );
+
+        Map<String, Object> data = Map.of(
+                "token", authResponse.getAccessToken(),
+                "refreshToken", authResponse.getRefreshToken(),
+                "user", dto
+        );
+
         return ResponseEntity.ok(
                 new ApiResponse<>(
                         "success",
                         "Login successful",
-                        response,
+                        data,
                         HttpStatus.OK.value()
                 )
         );
@@ -260,7 +290,8 @@ public class AuthController {
 //                    User user = rt.getUser();
 //
 //                    // delete all old tokens
-////                    refreshTokenService.revokeAllTokensForUser(user);
+
+    /// /                    refreshTokenService.revokeAllTokensForUser(user);
 //
 //                    RefreshToken newRt = refreshTokenService.createRefreshToken(user.getId());
 //
@@ -325,6 +356,23 @@ public class AuthController {
 //                        ))
 //                );
 //    }
+    @GetMapping("/me")
+    public ResponseEntity<ApiResponse<UserResponseDTO>> getCurrentUser(Principal principal) {
+        User user = userRepository.findByEmail(principal.getName())
+                .orElseThrow(() -> new UserNotFoundException("User not found"));
+
+        UserResponseDTO dto = new UserResponseDTO(
+                user.getId(),
+                user.getName(),
+                user.getEmail(),
+                user.getRole(),
+                user.getCreatedAt()
+        );
+
+        return ResponseEntity.ok(
+                new ApiResponse<>("success", "User fetched successfully", dto, 200)
+        );
+    }
 
 
 }
